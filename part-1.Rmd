@@ -1,0 +1,256 @@
+---
+title: 'gdv Report - Part 1: Visualisation Basics, Chart Types'
+author: "Joseph Weibel"
+date: "06.03.2021"
+output: 
+  pdf_document:
+    keep_tex: true
+    md_extensions: +raw_attribute
+bibliography: bibliography.json
+csl: apa.csl
+geometry: left=2cm,right=2cm,top=1.5cm,bottom=1.5cm
+header-includes:
+  - \usepackage{graphicx}
+  - \usepackage{wrapfig}
+  - \usepackage{caption}
+  - \captionsetup[figure]{font=tiny}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+original_plot <- knitr::knit_hooks$get("plot") 
+knitr::knit_hooks$set(plot = function(x, options) {
+  graphic <- original_plot(x, options)
+  if(!is.null(options$wrapfigure)) {
+    graphic <- str_replace(graphic, fixed("\\begin{figure}"), "")
+    graphic <- str_replace(graphic, fixed("\\end{figure}"), "")
+    begin <- sprintf('\\begin{wrapfigure}{%s}{%g\\textwidth}', options$wrapfigure[[1]], options$wrapfigure[[2]])
+    return (c(begin, graphic, '\\end{wrapfigure}'))
+  }
+  return(graphic)
+})
+
+
+library(tidyverse)
+library(zoo)
+library(ggplot2)
+library(RSwissMaps)
+library(corrr)
+source('./data.R')
+
+raw_data <- load_data()
+long_data <- raw_data %>%
+  rename_with(~ gsub('^(.{2})\\.(.+)$', '\\1.kanton.\\2', .x), zh.berecht:ju.annahme) %>%
+  pivot_longer(zh.kanton.berecht:ju.kanton.annahme, names_to = c('kanton', '.value'), names_pattern = "(.{2})\\.(.+)", values_drop_na = TRUE)
+
+total_entries <- nrow(raw_data)
+```
+
+\newpage
+
+Analysing large amounts of data in a simple table is hard, even for experienced data scientists. Determining data characteristics like distribution, dispersion, and extreme values from a data table requires a lot of brainpower and are not practical for laypersons. An excellent way is to visualise the data using plots which help the viewer to focus on specific data characteristics and see the essential aspects at first glance. It is easy to create visualisations; however, creating sophisticated visualisations requires a good understanding of the possibilities and pitfalls. Otherwise, visualisations can be misleading and, therefore, worse than no visualisation at all.
+
+On the following pages, important visualisation characteristics will be discussed along with some examples based on the Swissvotes dataset, which contains voting results about all Swiss popular votes since the first one in 1848 [@http://zotero.org/users/7645537/items/X2S7ZYLM]. 
+
+## Chart Types
+
+Before a data visualisation can be created, the correct chart type must be chosen, depending on the data types in the dataset and the aspects to highlight in the plot. Every chart type works only for specific data type combinations and can show only a certain amount of variables of each type. Data can be separated into two main types. On the one hand, there is numerical data which is everything that is represented as a number. Numerical data, in turn, can be separated into continuous (e.g. temperature, weight) and discrete (e.g. days in a month, number of students in a class) data. On the other hand, there is categorical data which is anything not numerical. Data of this type is differentiated between ordinal and nominal data, whereby the first is data that has a natural order, and the latter does not. Besides the data structure, the correct chart type depends on the target the creator wants to fulfil with the chart. There are chart types dedicated to comparing values, showing relationships between variables, and revealing the data structure. After defining the target and the variables to present, a suitable chart type can be evaluated. 
+
+```{r histogram, out.width=".3\\textwidth", wrapfigure=list("R", 0.3), fig.cap="Histogram showing number of referendums per year."}
+plot_histogram <- function () {
+  binwidth <- 1
+  ggplot(raw_data, mapping = aes(x = jahr)) +
+    geom_histogram(binwidth = binwidth) +
+    labs(
+      title = 'Number of Referendums per Year',
+      subtitle = sprintf('Total: %d, Bin Width: %d', total_entries, binwidth),
+      x = 'Year',
+      y = 'Quantity'
+    )
+}
+
+plot_histogram()
+```
+
+### Histogram
+
+One of the first handy plots to familiarise with a new dataset is the histogram. It reveals the distribution of a variable's values whereby the x-axis usually shows the ordinal data and the y axis reflects the number of occurrences. Since histograms group values of the variable in so-called bins, these plots can hide important information when the bin size is chosen inappropriately. They can hide the real distribution when the bins are too large, and the plot can get to unclear when set to small. A similar chart type is the density plot, which shows the distribution using a curve indicating the value's relative frequency. The histogram on the right shows the number of referendums held per year since 1848. It is clearly visible that, generally speaking, more votes have been held yearly in the last 50 years than in the years before and that only a few were held in the early days of the federal state. Such conclusions are a major goal of a histogram.
+
+```{r boxplot, fig.asp=.3, out.width=".3\\textwidth", wrapfigure=list("R", 0.3), fig.cap="Box plot showing distribution of voting results."}
+plot_boxplot <- function () {
+  ggplot(raw_data, mapping = aes(x = volkja.proz)) +
+    geom_boxplot() +
+    labs(
+      title = 'Distribution Voting Results',
+      x = 'Percentage Yes Votes'
+    )
+}
+
+plot_boxplot()
+```
+
+
+### Box Plot
+
+Another way to show the distribution of a numeric or ordinal variable, but more focussed on key metrics than the actual distribution, is the box plot. The rendered box represents the middle 50% of the occurrences, and the points outside the box are entries of the upper and lower 25%. Also, the median value is marked with a line inside the box. This chart is very technical and thus should not be presented to the crowd. Nevertheless, it is useful to show these metrics graphically, primarily when multiple box plots for several categories are generated and placed next to each other to compare them with each other. In the example, we can see that the median is below 50%, meaning that more referendums were rejected than accepted.
+
+
+```{r scatterplot, out.width=".3\\textwidth", wrapfigure=list("R", 0.3), fig.cap="Scatter plot showing number of cantons accepting a referndum along with the yes votes percentage."}
+plot_scatterplot <- function () {
+  data <- long_data %>%
+    group_by(anr) %>%
+    summarise(
+      annehmende_kantone = sum(ifelse(kanton.annahme == 'Accepted', 1, 0)), 
+      volkja.proz = first(volkja.proz),
+      annahme = first(annahme),
+      .groups = 'drop'
+    ) %>%
+    ungroup()
+  correlation <- cor(data$volkja.proz, data$annehmende_kantone, method = 'pearson')
+  ggplot(data, mapping = aes(x = volkja.proz, y = annehmende_kantone, color = annahme)) +
+    geom_point() +
+    scale_colour_manual(values = c('darkblue', 'darkred')) +
+    labs(
+      title = 'Voter Participation over Time',
+      subtitle = sprintf('Pearson Correlation: %f', correlation),
+      y = 'Number of Accepting Cantons',
+      x = 'Overall Yes Votes Percentage',
+      color = 'Final Result'
+    )
+}
+
+plot_scatterplot()
+```
+
+\newpage
+
+### Scatter Plot
+
+An example of a chart supporting two variables is the scatter plot. Every record in the dataset is shown as a point on a cartesian plan aligned on its values of both variables, placed on the x and y axes. It is especially useful to inspect a possible correlation between the two variables, being the case in the example. The more cantons accept a referendum, the bigger the part of the population accepting the referendum. It is even possible to integrate more variables into a scatter plot using different colours and transparency for the points. The example shows the votes' final results, and obviously, all referendums with less than 50% yes ballots got rejected. However, not all referendums above this limit were accepted since certain also require a majority of accepting cantons. With many data points or outliers, the points can overlap, and thus the plot can lead to misinterpretation. In these situations, it is good advice to jitter the points or inspect parts of the dataset.
+
+```{r linechart, fig.asp=0.4, out.width=".3\\textwidth", wrapfigure=list("R", 0.3), fig.cap="Line chart showing voter participation over time."}
+plot_linechart <- function () {
+  rolling_period = 5
+  data <- as_tibble(raw_data %>%
+    filter(!is.na(bet)) %>%
+    group_by(jahr) %>%
+    summarise(avg_bet = mean(bet), .groups = 'drop') %>%
+    ungroup() %>%
+    rollapply(rolling_period, mean, align = 'right'))
+  ggplot(data, mapping = aes(x = jahr, y = avg_bet)) +
+    geom_line() +
+    xlim(1879, 2020) +
+    ylim(0, 100) +
+    labs(
+      title = 'Voter Participation over Time',
+      subtitle = sprintf('Rolling period over last %d years', rolling_period),
+      y = 'Participation in Percent',
+      x = 'Voting Date'
+    )
+}
+
+plot_linechart()
+```
+
+### Line Chart
+
+Line charts work the same way as scatter plots except that a line is drawn between the points. Thus it also requires a continuous variable on the x-axis (or y-axis if mirrored) and only one value per x-axis unit. Time-based data like stock prices or voter participation (see example) over time is often shown on such plots. 
+
+
+```{r barchart, out.width=".3\\textwidth", wrapfigure=list("R", 0.3), fig.cap="Bar chart showing voter participation per canton."}
+participation_per_canton_data <- long_data %>%
+  filter(jahr >= 2000) %>%
+  group_by(kanton) %>%
+  summarise(avg_bet = mean(kanton.bet, na.rm = TRUE), .groups = 'drop') %>%
+  ungroup() %>%
+  arrange(desc(avg_bet)) %>%
+  mutate(kanton = toupper(kanton))
+plot_barchart <- function () {
+  ggplot(participation_per_canton_data, mapping = aes(x = avg_bet, y = reorder(kanton, avg_bet), fill = avg_bet)) +
+    geom_bar(stat = 'identity', show.legend = FALSE) +
+    scale_fill_distiller(palette = 'RdYlBu', direction = 1) +
+    labs(
+      title = 'Average Voter Participation per Canton since 2000',
+      y = 'Canton',
+      x = 'Participation in Percent'
+    )
+}
+
+plot_barchart()
+```
+
+### Bar Chart
+
+Bar charts are straightforward for the viewer. Every value of a categorical variable has a bar or column that reflects the value of the corresponding numerical value. They are great to compare the numeric values, and if the numeric values is a sum of different values, they can also be shown by dividing the bar into parts. However, too many bars will make it difficult to determine an exact numeric value for the column, and the whole plot gets unwieldy. The example shows the average voter participation since 2000 per canton. At first glance, the viewer can tell that participation is the highest in canton Schaffhausen, most likely because it is compulsory to vote there.
+
+```{r map, warning=F, fig.asp=0.5, out.width=".3\\textwidth", wrapfigure=list("R", 0.3), fig.cap="Map showing voter participation per canton."}
+plot_map <- function () {
+  participation_per_canton_map_data <- can.template(2016) %>%
+    inner_join(participation_per_canton_data, by = c('name' = 'kanton'))
+  can.plot(
+    participation_per_canton_map_data$bfs_nr, 
+    participation_per_canton_map_data$avg_bet, 
+    2016,
+    title = 'Average Voter Participation per Canton since 2000',
+    legend_title = 'Participation in Percent',
+  )
+}
+
+plot_map()
+```
+
+### Map
+
+Geographical data, like the one in the last example, can certainly be shown on a map. Depending on the data points' accuracy, the data can be presented as exact points on the map or as coloured areas (e.g. counties, countries) on the map. A significant advantage of plotting data on a map is that any geographical clusters and correlations are more apparent. Nonetheless, reading an exact value or finding slight differences between data points is not possible except they are printed on the map. However, this is more difficult for a static graphic with many points or small areas to colour. 
+
+
+### Pie Chart
+
+```{r pie, fig.asp=0.3, out.width=".3\\textwidth", wrapfigure=list("R", 0.3), fig.cap="Pie chart showing result of a single vote."}
+plot_piechart <- function () {
+  stackedbar_data <- raw_data %>% 
+    filter(anr == 395) %>%
+    pivot_longer(c('leer', 'volkja', 'volknein'), names_to = 'typ', values_to = 'menge') %>%
+    mutate(typ = factor(
+      typ, 
+      labels = c('yes', 'no', 'empty'), 
+      levels = c('volkja', 'volknein', 'leer')
+    ))
+  
+  stackedbar_plot_data <- stackedbar_data %>%
+    mutate(prozent = round(menge / sum(stackedbar_data$menge), 1)) %>%
+    select(anr, typ, menge, prozent) %>%
+    arrange(desc(typ)) %>%
+    mutate(ypos = case_when(
+      typ == 'yes' ~ menge - 0,
+      typ == 'no' ~ menge - 0,
+      typ == 'empty' ~ menge - 100000,
+    ))
+
+  ggplot(stackedbar_plot_data, mapping = aes(x = '', y = menge, fill = typ)) +
+    geom_bar(stat = 'identity', width = 1, colour = 'white') +
+    coord_polar("y", start = 0) +
+    geom_text(aes(y = ypos, label = paste0(prozent * 100, '%')), color = "black", size = 6) +
+    scale_fill_manual(values = c('lightblue', 'pink', 'lightyellow', 'gray')) +
+    theme_void() +
+    labs(
+      title = 'Results for "Kantonswechsel des Laufentals zu Basel-Landschaft"',
+      fill = 'Vote'
+    )
+}
+
+plot_piechart()
+```
+
+Pie charts and doughnut charts are widespread; however, they have a few problems. First, human's eyes are not trained to compare the pie slices' sizes as fast as they can compare bar sizes, exact values can only be read when printed on the portion, and additionally, pie charts can only show one numeric variable. For that, they require a lot of space, and in many cases, a bar chart is a better way to present proportions of a whole. Nevertheless, they can be used, for example, to show a voting result as they are only a few parts to show and people are used to seeing the results in such a visualisation. However, many newspapers are moving from pie to stacked bar charts because of the mentioned reasons.
+
+\newpage
+
+# Appendix
+
+```{r appendix}
+plot_histogram()
+```
+
+# References

@@ -37,3 +37,8 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+
+# Output
+*.pdf
+*.tex
+*_files/

@@ -1,0 +1,94 @@
+[
+	{
+		"id": "http://zotero.org/users/7645537/items/X2S7ZYLM",
+		"type": "article",
+		"title": "Swissvotes – die Datenbank der eidgenössischen Volksabstimmungen: Datensatz",
+		"URL": "www.swissvotes.ch",
+		"author": [
+			{
+				"literal": "Année Politique Suisse"
+			},
+			{
+				"literal": "Universität Bern"
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2020",
+					10,
+					18
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2020"
+				]
+			]
+		}
+	},
+	{
+		"id": "http://zotero.org/users/7645537/items/USSJK9H4",
+		"type": "post-weblog",
+		"container-title": "storytelling with data",
+		"title": "chart chooser — storytelling with data",
+		"URL": "http://www.storytellingwithdata.com/blog/2013/04/chart-chooser",
+		"author": [
+			{
+				"family": "Nussbaumer Knaflic",
+				"given": "Cole"
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2021",
+					3,
+					6
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2013",
+					4,
+					6
+				]
+			]
+		}
+	},
+	{
+		"id": "http://zotero.org/users/7645537/items/PLQE7977",
+		"type": "post-weblog",
+		"container-title": "towards data science",
+		"title": "10 Visualizations Every Data Scientist Should Know | by Jorge Castañón | Towards Data Science",
+		"URL": "https://towardsdatascience.com/10-viz-every-ds-should-know-4e4118f26fc3",
+		"author": [
+			{
+				"family": "Castañón",
+				"given": "Jorge"
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2021",
+					3,
+					6
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2019",
+					6,
+					19
+				]
+			]
+		}
+	}
+]
