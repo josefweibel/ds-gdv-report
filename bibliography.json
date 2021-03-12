@@ -30,6 +30,37 @@
 		}
 	},
 	{
+		"id": "http://zotero.org/users/7645537/items/PLQE7977",
+		"type": "post-weblog",
+		"container-title": "towards data science",
+		"title": "10 Visualizations Every Data Scientist Should Know",
+		"URL": "https://towardsdatascience.com/10-viz-every-ds-should-know-4e4118f26fc3",
+		"author": [
+			{
+				"family": "Castañón",
+				"given": "Jorge"
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2021",
+					3,
+					6
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2019",
+					6,
+					19
+				]
+			]
+		}
+	},
+	{
 		"id": "http://zotero.org/users/7645537/items/USSJK9H4",
 		"type": "post-weblog",
 		"container-title": "storytelling with data",
@@ -56,37 +87,6 @@
 					"2013",
 					4,
 					6
-				]
-			]
-		}
-	},
-	{
-		"id": "http://zotero.org/users/7645537/items/PLQE7977",
-		"type": "post-weblog",
-		"container-title": "towards data science",
-		"title": "10 Visualizations Every Data Scientist Should Know | by Jorge Castañón | Towards Data Science",
-		"URL": "https://towardsdatascience.com/10-viz-every-ds-should-know-4e4118f26fc3",
-		"author": [
-			{
-				"family": "Castañón",
-				"given": "Jorge"
-			}
-		],
-		"accessed": {
-			"date-parts": [
-				[
-					"2021",
-					3,
-					6
-				]
-			]
-		},
-		"issued": {
-			"date-parts": [
-				[
-					"2019",
-					6,
-					19
 				]
 			]
 		}
