@@ -67,7 +67,7 @@ On the following pages, important visualisation characteristics will be discusse
 
 ## Chart Types
 
-Before a data visualisation can be created, the correct chart type must be chosen, depending on the data types in the dataset and the aspects to highlight in the plot. Every chart type works only for specific data type combinations and can show only a certain amount of variables of each type. [@http://zotero.org/users/7645537/items/USSJK9H4] Data can be separated into two main types. On the one hand, there is numerical data which is everything that is represented as a number. Numerical data, in turn, can be separated into continuous (e.g. temperature, weight) and discrete (e.g. days in a month, number of students in a class) data. On the other hand, there is categorical data which is anything not numerical. Data of this type is differentiated between ordinal and nominal data, whereby the first is data that has a natural order, and the latter does not. Besides the data structure, the correct chart type depends on the target the creator wants to fulfil with the chart. There are chart types dedicated to comparing values, showing relationships between variables, and revealing the data structure. After defining the target and the variables to present, a suitable chart type can be evaluated. 
+Before a data visualisation can be created, the correct chart type must be chosen, depending on the data types in the dataset and the aspects to highlight in the plot. Every chart type works only for specific data type combinations and can show only a certain amount of variables of each type [@http://zotero.org/users/7645537/items/USSJK9H4]. Data can be separated into two main types. On the one hand, there is numerical data which is everything that is represented as a number. Numerical data, in turn, can be separated into continuous (e.g. temperature, weight) and discrete (e.g. days in a month, number of students in a class) data. On the other hand, there is categorical data which is anything not numerical. Data of this type is differentiated between ordinal and nominal data, whereby the first is data that has a natural order, and the latter does not. Besides the data structure, the correct chart type depends on the target the creator wants to fulfil with the chart. There are chart types dedicated to comparing values, showing relationships between variables, and revealing the data structure. After defining the target and the variables to present, a suitable chart type can be evaluated. 
 
 ```{r histogram, out.width=".3\\textwidth", wrapfigure=list("R", 0.3), fig.cap=histogram_caption}
 histogram_caption <- 'Histogram showing number of referendums per year.'
@@ -109,23 +109,23 @@ plot_densityplot()
 
 A similar chart type to the histogram is the density plot, which shows the distribution using a curve indicating the value's relative frequency instead of the actual count. The curve is smoothed, and hence this plot is easier to understand than the histogram. However, this leads to some inaccuracy, and therefore the visualised data should be continuous and have a smooth distribution to avoid getting too inaccurate graphics. It is a similar problem as with the too-large bin sizes on histograms. The inaccuracy can be observed when comparing the density plot on the right with the histogram above.
 
-### Box Plot
-
-```{r boxplot, fig.asp=.3, out.width=".3\\textwidth", wrapfigure=list("R", 0.3), fig.cap=boxplot_caption}
+```{r boxplot, fig.asp=1.39, out.width=".1\\textwidth", wrapfigure=list("R", 0.17), fig.cap=boxplot_caption}
 boxplot_caption <- 'Box plot showing distribution of voting results.'
 plot_boxplot <- function () {
-  ggplot(raw_data, mapping = aes(x = volkja.proz)) +
+  ggplot(raw_data, mapping = aes(y = volkja.proz)) +
     geom_boxplot() +
     labs(
       title = 'Distribution Voting Results',
-      x = 'Percentage Yes Votes'
+      y = 'Percentage Yes Votes'
     )
 }
 
 plot_boxplot()
 ```
 
-Another way to show the distribution of a numeric or ordinal variable, but more focussed on key metrics than the actual distribution, is the box plot. The rendered box represents the middle 50% of the occurrences, and the lines and possibly points outside the box represent the remaining entries. Also, the median value is marked with a line inside the box. This chart is very technical and thus should not be presented to the general public. Nevertheless, it is helpful to show these metrics graphically, primarily when multiple box plots for several categories are generated and placed side by side to compare them with each other. The example boxplot shows a median slightly below 50%, meaning that more referendums were rejected than accepted.
+### Box Plot
+
+Another way to show the distribution of a numeric or ordinal variable, but more focussed on key metrics than the actual distribution, is the box plot. The rendered box represents the middle 50% of the occurrences, and the lines and possibly points outside the box represent the remaining entries. Also, the median value is marked with a line inside the box. This chart is very technical and should not be presented to the general public without a proper introduction. Nevertheless, it is helpful to show these metrics graphically, primarily when multiple box plots for several categories are generated and placed side by side to compare them with each other. The example boxplot shows a median slightly below 50%, meaning more referendums were rejected than accepted.
 
 \newpage
 
@@ -204,9 +204,8 @@ participation_per_canton_data <- long_data %>%
   mutate(kanton = toupper(kanton))
 
 plot_barchart <- function () {
-  ggplot(participation_per_canton_data, mapping = aes(x = avg_bet, y = reorder(kanton, avg_bet), fill = avg_bet)) +
+  ggplot(participation_per_canton_data, mapping = aes(x = avg_bet, y = reorder(kanton, avg_bet))) +
     geom_bar(stat = 'identity', show.legend = FALSE) +
-    scale_fill_distiller(palette = 'RdYlBu', direction = 1) +
     labs(
       title = 'Average Voter Participation per Canton since 2000',
       y = 'Canton',
@@ -219,7 +218,7 @@ plot_barchart()
 
 ### Bar Chart
 
-Bar charts are straightforward for the viewer. Every value of a categorical variable has a bar or column that reflects the value of the corresponding numerical value. They are great to compare the numeric values, and if the numeric values are sums of different subordinated values, they can also be shown by dividing the bar into parts. These are called stacked bar charts. However, too many bars will make it difficult to determine an exact numeric value for the column, and the whole plot gets unwieldy. Restricting to only a certain amount of values will solve it. [@http://zotero.org/users/7645537/items/PLQE7977] The example shows the average voter participation since 2000 per canton. At first glance, the viewer can tell that participation is the highest in canton Schaffhausen, most likely because it is somehow compulsory to vote there.
+Bar charts are straightforward for the viewer. Every value of a categorical variable has a bar or column that reflects the value of the corresponding numerical value. They are great to compare the numeric values, and if the numeric values are sums of different subordinated values, they can also be shown by dividing the bar into parts. These are called stacked bar charts. However, too many bars will make it difficult to determine an exact numeric value for the column, and the whole plot gets unwieldy. Restricting to only a certain amount of values will solve it [@http://zotero.org/users/7645537/items/PLQE7977]. The example shows the average voter participation since 2000 per canton. At first glance, the viewer can tell that participation is the highest in canton Schaffhausen, most likely because it is somehow compulsory to vote there.
 
 ```{r map, warning=F, fig.asp=0.45, out.width=".3\\textwidth", wrapfigure=list("R", 0.3), fig.cap=map_vaption}
 map_vaption <- 'Map showing voter participation per canton.'
