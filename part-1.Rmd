@@ -246,8 +246,8 @@ Geographical data, like the one in the last example, can certainly be shown on a
 
 ```{r pie, fig.asp=0.3, out.width=".3\\textwidth", wrapfigure=list("R", 0.3), fig.cap=piechart_caption}
 piechart_caption <- 'Pie chart showing result of a single vote.'
-plot_piechart <- function () {
-  stackedbar_data <- raw_data %>% 
+plot_piechart <- function (label_size = 6) {
+  pie_data <- raw_data %>% 
     filter(anr == 395) %>%
     pivot_longer(c('leer', 'volkja', 'volknein'), names_to = 'typ', values_to = 'menge') %>%
     mutate(typ = factor(
@@ -256,8 +256,8 @@ plot_piechart <- function () {
       levels = c('volkja', 'volknein', 'leer')
     ))
   
-  stackedbar_plot_data <- stackedbar_data %>%
-    mutate(prozent = round(menge / sum(stackedbar_data$menge), 1)) %>%
+  pie_plot_data <- pie_data %>%
+    mutate(prozent = round(menge / sum(pie_data$menge), 1)) %>%
     select(anr, typ, menge, prozent) %>%
     arrange(desc(typ)) %>%
     mutate(ypos = case_when(
@@ -266,10 +266,10 @@ plot_piechart <- function () {
       typ == 'empty' ~ menge - 100000,
     ))
 
-  ggplot(stackedbar_plot_data, mapping = aes(x = '', y = menge, fill = typ)) +
+  ggplot(pie_plot_data, mapping = aes(x = '', y = menge, fill = typ)) +
     geom_bar(stat = 'identity', width = 1, colour = 'white') +
     coord_polar("y", start = 0) +
-    geom_text(aes(y = ypos, label = paste0(prozent * 100, '%')), color = "black", size = 6) +
+    geom_text(aes(y = ypos, label = paste0(prozent * 100, '%')), color = "black", size = label_size) +
     scale_fill_manual(values = c('lightblue', 'pink', 'lightyellow', 'gray')) +
     theme_void() +
     labs(
@@ -278,7 +278,7 @@ plot_piechart <- function () {
     )
 }
 
-plot_piechart()
+plot_piechart(3)
 ```
 
 Pie charts and doughnut charts are widespread; however, they have a few problems. First, human's eyes are not trained to compare the pie slices' sizes as fast as they can compare bar sizes, exact values can only be read when printed on the portion, and additionally, pie charts can only show one numeric variable. For that, they require a lot of space, and in many cases, a (stacked) bar chart is a better way to present proportions of a whole. Nevertheless, they can be used, for example, to show a voting result as they are only a few parts to show and people are used to seeing the results in such a visualisation.
@@ -303,7 +303,7 @@ plot_densityplot()
 
 ### Figure 3: `r boxplot_caption`
 
-```{r appendix-figure-boxplot, fig.asp=.3}
+```{r appendix-figure-boxplot, fig.asp=1.4, out.width=".4\\textwidth"}
 plot_boxplot()
 ```
 
