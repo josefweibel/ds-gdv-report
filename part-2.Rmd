@@ -1,0 +1,312 @@
+---
+title: 'gdv Report - Part 2'
+subtitle: 'Visual Perception'
+author: "Joseph Weibel"
+date: "20.03.2021"
+output: 
+  pdf_document:
+    keep_tex: true
+    md_extensions: +raw_attribute
+    
+bibliography: bibliography.json
+csl: apa.csl
+geometry: left=1.5cm,right=1.5cm,top=1.9cm,bottom=1.9cm
+header-includes:
+  - \usepackage{graphicx}
+  - \usepackage{wrapfig}
+  - \usepackage{caption}
+  - \captionsetup[figure]{font=tiny}
+  - \usepackage{fancyhdr}
+  - \pagestyle{fancy}
+  - \fancyfoot[L]{Joseph Weibel}
+  - \fancyfoot[R]{gdv Report}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+original_plot <- knitr::knit_hooks$get("plot") 
+knitr::knit_hooks$set(plot = function(x, options) {
+  graphic <- original_plot(x, options)
+  if(!is.null(options$wrapfigure)) {
+    graphic <- str_replace(graphic, fixed("\\begin{figure}"), "")
+    graphic <- str_replace(graphic, fixed("\\end{figure}"), "")
+    begin <- sprintf('\\begin{wrapfigure}{%s}{%g\\textwidth}', options$wrapfigure[[1]], options$wrapfigure[[2]])
+    return (c(begin, graphic, '\\end{wrapfigure}'))
+  }
+  return(graphic)
+})
+
+
+library(tidyverse)
+library(zoo)
+library(ggplot2)
+library(RSwissMaps)
+library(corrr)
+source('./data.R')
+
+raw_data <- load_data()
+long_data <- raw_data %>%
+  rename_with(~ gsub('^(.{2})\\.(.+)$', '\\1.kanton.\\2', .x), zh.berecht:ju.annahme) %>%
+  pivot_longer(zh.kanton.berecht:ju.kanton.annahme, names_to = c('kanton', '.value'), names_pattern = "(.{2})\\.(.+)", values_drop_na = TRUE)
+
+total_entries <- nrow(raw_data)
+```
+
+\vspace{10pt}
+
+\begin{center}
+Github Repository: https://github.com/josefweibel/ds-gdv-report
+\end{center}
+
+\newpage
+
+# Visual Perception
+
+Good visualisations allow the viewers to extract the key facts within a few seconds. The first decision to make for a good visualisation is to choose the right chart type. But after that, there are many more decisions to take on how the data should be presented. Human brains are able to recognise objects and patterns subcounsously in a fraction of a second. Brains permanently collect information from the environment, filter it continously and the most important parts of it are processed further by concious analysis [@http://zotero.org/users/7645537/items/GA6VT739]. This quality of extracting important information in a short time is called pre-attentive processing and by correctly designing a visualisation, we can make use of it.
+
+## Gestalt Theory
+
+The Gestalt psychology helps to understand the abilities of human brains when it comes to visual perception. It emerged in the 20th century, and averted from the then long existing theory that humans recognise each component of a greater picture individually. The Gestalt theory proposed that minds analyse patterns of components to understand the whole picture. The different types of patterns a human is able to insepct are the so-called Gestalt principles [@http://zotero.org/users/7645537/items/ZIUFQJ7Y].
+
+One of these principles is the law of proximity. An individual automatically groups items being close together and separates them from items with more space between them even when there are lines and other elements to separate are missing [@http://zotero.org/users/7645537/items/RNUJTTDS]. Therefore, components belonging togehter should have less distance between them than to items from another group. Not only proximity of components can be used to group them, but also similarity of elements. By giving certain items, for example, the same colour, viewers will assume they belong together. This works also when using the same shape, shading or other properties [@http://zotero.org/users/7645537/items/ZIUFQJ7Y] and will be used often used in data visualisation to express similarity between certain markers. 
+
+The law of closure says that visualised objects with gaps do not stop individuals from seeing the complete objects. A brain will perceive many standalone dots as the line they are forming [@http://zotero.org/users/7645537/items/RNUJTTDS]. In data visualisation for instance, scatter plots aim to show a correlation between two variables by showing many points which form a line when the variables correlate. Also, humans automatically try to identify symmetrical objects when viewing a picture. Instead of seeing complex figures, they use symmetry to extract known simple forms. The law of similarity helps to identify parts in a graphic which will be inspected for symmetrical objects [@http://zotero.org/users/7645537/items/RNUJTTDS]. The next principle, the law of common fate, is relevant for interactive visualtisations. It states that humans distinguish between the objects moving in the same direction and the ones which are not moving or move in another direction. The items not behaving like the others, will be perceived actively by human's mind [@http://zotero.org/users/7645537/items/6GJ2AUHC].
+
+Humans require the law of continuity to understand line charts with multiple cutting lines. Their eyes will follow a line on a point of intersection on the smoothes path. Sudden bends are not expected and such can confuse the viewer [@http://zotero.org/users/7645537/items/RNUJTTDS]. Brains do not only analyse the visualised elements, they also interpret the empty space of a visualisation. This law is often deliberately used for visual illusions but can also be used by product designers and data scientists to highlight specific items [@http://zotero.org/users/7645537/items/RNUJTTDS].
+
+## Bertin's Characteristics
+
+These theoretical principles are all relevant when designing data visualisations. French cartographer Jacques Bertin determined seven concrete visual variables for markters which base on these Gestalt principles to create meaningful maps and other graphics [@http://zotero.org/users/7645537/items/286WNG6C]. Berting categorised these characteristics into four groups. All variables except shape and orientation are selective, meaning that the viewer can determine the different groups at first glance, whereby associative variables like shape and color hue can be used to determine the group of a single marker. If an order of the visual variable's values can be determined by the viewer, they get classified as ordinal. This is possible with colour saturation and size but not with shapes. And finally, if it is possible to extract a value from the variable, it is categorised as quantitative like the size but not the colour hue [@http://zotero.org/users/7645537/items/ZSPWKPQD]. 
+
+### Location
+
+```{r location_scale, fig.asp=0.2, out.width="50%", fig.show = "hold", fig.cap=location_scale_caption}
+location_scale_caption <- 'Line charts showing voter participation over time with different y scales.'
+plot_linechart <- function (y_start = 0, y_end = 100) {
+  rolling_period = 5
+  data <- as_tibble(raw_data %>%
+    filter(!is.na(bet)) %>%
+    group_by(jahr) %>%
+    summarise(avg_bet = mean(bet), .groups = 'drop') %>%
+    ungroup() %>%
+    rollapply(rolling_period, mean, align = 'right'))
+  ggplot(data, mapping = aes(x = jahr, y = avg_bet)) +
+    geom_line() +
+    xlim(1879, 2020) +
+    ylim(y_start, y_end) +
+    labs(
+      title = 'Voter Participation over Time',
+      caption = sprintf('Rolling period over last %d years', rolling_period),
+      y = 'Participation in Percent',
+      x = 'Voting Date'
+    )
+}
+
+plot_linechart(35, 75)
+plot_linechart()
+```
+
+```{r location_periodic1, fig.asp=0.3, out.width=".1\\textwidth", wrapfigure=list("R", 0.2), fig.cap=location_periodic1_caption}
+location_periodic1_caption <- 'Line chart using a cartesian coordinate system.'
+plot_periodic_linechart <- function (use_polar = 0) {
+  data <- raw_data %>%
+    group_by(monat) %>%
+    summarise(count = n(), .groups = 'drop') %>%
+    ungroup()
+  
+  if (use_polar) {
+    data <- data %>%
+      add_row(monat = 0, count = data[which(data$monat == 12), ]$count)
+  }
+
+  plot <- ggplot(data, mapping = aes(x = monat, y = count)) +
+    geom_line() +
+    scale_x_continuous(breaks = 1:12) +
+    labs(
+      title = 'Number of Referendums per Month',
+      y = 'Number of Referendums',
+      x = 'Month'
+    )
+  
+  if (use_polar) {
+    plot <- plot + coord_polar()
+  }
+  
+  return(plot)
+}
+
+plot_periodic_linechart()
+```
+
+Any visualisation requires positioning of items and in most cases values will be placed on a conventional 2D Cartesian coordinate system [@http://zotero.org/users/7645537/items/Y2NS2S2E]. There are certain expectations which type of values are placed on which axis, like time values are usually placed on the y axis. The scales should always start at the zero point to avoid misinterpreatation when numeric values are placed on axes. The voter participation trend in Figure 1 on the left side implies greater deviations over time than they actually were, when comparing with the right plot having a y axis from 0 to 100 percent.
+
+```{r location_periodic2, fig.asp=0.3, out.width=".2\\textwidth", wrapfigure=list("R", 0.2), fig.cap=location_periodic2_caption}
+location_periodic2_caption <- 'Line chart using a polar coordinate system.'
+plot_periodic_linechart(1)
+```
+
+When both scales are of the same unit, it is good advice to have equal segementations on both axes. However, the scales don't always have to be linear. Logarithmic scales can be used to visualise an exponential slope so that the focus in on changes in the increase of the value. However, such scales can never show a value zero. There are also alternatives to the cartesian corrdinate system. The polar coordinate system can be useful to show periodic data like months of a year [@http://zotero.org/users/7645537/items/Y2NS2S2E]. The example below shows the same data. On the left side the number of referndums per month are shown using a regular cartesian and on the right side using a polar coordinate system. On both it becomes clear, that referendums are more or less always held during the same time of the year and the differences are huge.
+
+```{r shape, fig.asp=0.2, out.width=".2\\textwidth", wrapfigure=list("R", 0.2), fig.cap=shape_caption}
+shape_caption <- 'Chart using different shapes.'
+
+bet_trend_values <- c('increasing', 'constant', 'decreasing')
+canton_voter_participation_data <- long_data %>%
+  filter(jahr == 2019) %>%
+  group_by(kanton) %>%
+  summarise(
+    avg_bet_2019 = mean(kanton.bet), 
+    avg_berecht_2019 = mean(kanton.berecht), 
+    .groups = 'drop'
+  ) %>%
+  ungroup() %>%
+  mutate(
+    avg_bet_2018 = long_data %>%
+      filter(jahr == 2018) %>%
+      group_by(kanton) %>%
+      summarise(avg_bet_2018 = mean(kanton.bet), .groups = 'drop') %>%
+      ungroup() %>%
+      select(avg_bet_2018),
+    bet_trend = case_when(
+      avg_bet_2019 - avg_bet_2018 > 0 ~ 'increasing',
+      avg_bet_2019 - avg_bet_2018 < 0 ~ 'decreasing',
+      TRUE ~ 'constant'
+    ),
+    bet_trend_compulsory = ifelse(kanton %in% c('sh'), paste0(bet_trend, ' (compulsory)'), bet_trend)
+  ) %>%
+  mutate(bet_trend = factor(bet_trend, levels = bet_trend_values, labels = bet_trend_values))
+
+plot_shape <- function () {
+  ggplot(canton_voter_participation_data, mapping = aes(x = toupper(kanton), y = avg_bet_2019, shape = bet_trend)) +
+    geom_point() +
+    scale_shape_manual(values = c('decreasing' = 6, 'constant' = 5, 'increasing' = 2)) +
+    ylim(0, 100) +
+    labs(
+      title = 'Average Voter Participation 2019 per Canton',
+      y = 'Voter Participation',
+      x = 'Canton',
+      shape = 'Compared to 2018'
+    )
+}
+
+plot_shape()
+```
+
+### Shape and Size
+
+The marker must be represented by a shape. Basically this is a line, a point or a bar depending on the chart. However, there are more variations for each chart type to categorise values. Instead of using simple points, arrows, squares, triangles, circles, etc. can be used which are mapped to a category on a legend [@http://zotero.org/users/7645537/items/FBBRGNJV].
+
+
+```{r size, fig.asp=0.2, out.width=".2\\textwidth", wrapfigure=list("R", 0.2), fig.cap=size_caption}
+size_caption <- 'Bar chart using different sizes.'
+plot_size <- function (fill = NULL, highlight = FALSE) {
+  fill_colours = c('decreasing' = '#d95f02', 'constant' = '#7570b3', 'increasing' = '#1b9e77')
+  
+  if (highlight) {
+    fill_colours = c(
+      'decreasing (compulsory)' = '#de2d26', 
+      'constant (compulsory)' = '#3182bd', 
+      'increasing (compulsory)' = '#31a354',
+      'decreasing' = '#fc9272', 
+      'constant' = '#9ecae1', 
+      'increasing' = '#a1d99b'
+    )
+  }
+  
+  max_berecht <- max(canton_voter_participation_data$avg_berecht_2019)
+  
+  ggplot(canton_voter_participation_data) +
+    geom_bar(mapping = aes(x = toupper(kanton), y = avg_bet_2019, fill = fill), width = canton_voter_participation_data$avg_berecht_2019 / max_berecht * 1.7, stat = 'identity') +
+    ylim(0, 100) +
+    scale_fill_manual(values = fill_colours) +
+    labs(
+      title = 'Average Voter Participation 2019 per Canton',
+      y = 'Voter Participation',
+      x = 'Canton',
+      size = 'Number of Eligible Voters',
+      fill = 'Compared to 2018'
+    )
+}
+
+plot_size()
+```
+
+The size of the item to show should not be negelected. It is obvious, that the bars' lengths in a bar chart are important, but a points radius or the width of a bar can be used to show an additional variable if needed and suitable. The example on the right shows the same data as in the last plot but now the width of each column represents the number of eligible voter in each canton to indicate the viewer the absolute voter participation as the differences are huge.
+
+
+```{r colour1, fig.asp=0.2, out.width=".2\\textwidth", wrapfigure=list("R", 0.2), fig.cap=colour1_caption}
+colour1_caption <- 'Bar chart using different colour hues.'
+plot_size(fill = canton_voter_participation_data$bet_trend)
+```
+
+### Colour
+
+Colour is an essential characteristic of data visualisations. However, they can have different purposes. The shading (colour hue) is selective and associative as the viewer can distinguish between the various colour hues and is able to categorise them using a legend. Thus, hues are used to group values using a categorical data variable. Colour palettes for that purpopse contain a finite number of distinct but matching colours whereby none of them stands out. This to prevent the viewer seeing an order in them which should not be case since all groups should be treated equal [@http://zotero.org/users/7645537/items/Y2NS2S2E]. See the example on the right for an example where the bars are painted greenish if the participation has increased in 2019 comparing to the year before or if otherwise, the columns are painted reddish. 
+
+```{r colour2, fig.asp=0.2, out.width=".2\\textwidth", wrapfigure=list("R", 0.2), fig.cap=colour2_caption}
+colour2_caption <- 'Bar chart using different colour hues and values.'
+plot_size(fill = canton_voter_participation_data$bet_trend_compulsory, highlight = TRUE) +
+  labs(title = 'Canton Schaffhausen the only Canton with Voting Obligation')
+```
+
+To show an order using colours, the colours must indicate a natural order which can be resolved using different brightnesses as an example. They can be all of the same hue or use multiple following common gradients (dark red to light yellow). Such colour paletts are useful to display a continuous value which the viewer can use to compare the values among each other. There are also dedicated paletts to present deviations in one or two directions. These paletts contain light colours for small deviation and dark colours for high deviations. The colours must also indicate a natural order. Finally, colours can be used to bring the focus of the viewer on specific data points. The highlighted data points are painted in darker or more saturated colours than the others whereby colour hues can match between both colour schemes [@http://zotero.org/users/7645537/items/Y2NS2S2E]. The example on the right highlights all cantons where voting is compulsory (only Schaffhausen) and also uses colour hues to show the participation trend. When choosing colours, it is important to consider certain which are distinguisable by colourblind people. Predefined colour paletts are available at colorbrewer2.org where all mentioned aspectes were considered. It is also possible to use different texture on the markers or change the transparency, which is advisable when markers can overlap.
+
+### Orientation
+
+The orientation of a shape can indicate another value. For instance, an arrow can change its meaning depending on how its rotated (see Figure 4). However, when it comes to 2D maps, a study proves that the orientation has the least benefit for the viewer of all these visual variables [@http://zotero.org/users/7645537/items/ZSPWKPQD].
+
+\newpage
+
+# Appendix
+
+## Figures
+
+### Figure 1: `r location_scale_caption`
+
+```{r appendix-figure-location-scale, out.width="50%", fig.show = "hold", fig.width=6}
+plot_linechart(35, 75)
+plot_linechart()
+```
+
+### Figure 2: `r location_periodic1_caption`
+
+```{r appendix-figure-location-periodic-1, fig.width=12}
+plot_periodic_linechart()
+```
+
+### Figure 3: `r location_periodic2_caption`
+
+```{r appendix-figure-location-periodic-2, fig.width=12}
+plot_periodic_linechart(1)
+```
+
+### Figure 4: `r shape_caption`
+
+```{r appendix-figure-shape, fig.width=12}
+plot_shape()
+```
+
+### Figure 5: `r size_caption`
+
+```{r appendix-figure-size, fig.width=12}
+plot_size()
+```
+
+### Figure 6: `r colour1_caption`
+
+```{r appendix-figure-colour1, fig.width=12}
+plot_size(fill = canton_voter_participation_data$bet_trend)
+```
+
+### Figure 7: `r colour2_caption`
+
+```{r appendix-figure-colour2, fig.width=12}
+plot_size(fill = canton_voter_participation_data$bet_trend_compulsory, highlight = TRUE) +
+  labs(title = 'Canton Schaffhausen the only Canton with Voting Obligation')
+```
+
+
+\newpage
+
+# References

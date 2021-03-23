@@ -90,5 +90,307 @@
 				]
 			]
 		}
+	},
+	{
+		"id": "http://zotero.org/users/7645537/items/GA6VT739",
+		"type": "entry-encyclopedia",
+		"abstract": "Pre-attentive processing is the subconscious accumulation of information from the environment.  All available information is pre-attentively processed. Then, the brain filters and processes what is important.  Information that has the highest salience (a stimulus that stands out the most) or relevance to what a person is thinking about is selected for further and more complete analysis by conscious (attentive) processing. Understanding how pre-attentive processing works is useful in advertising, in education, and for prediction of cognitive ability.",
+		"container-title": "Wikipedia",
+		"language": "en",
+		"note": "Page Version ID: 913130601",
+		"source": "Wikipedia",
+		"title": "Pre-attentive processing",
+		"URL": "https://en.wikipedia.org/w/index.php?title=Pre-attentive_processing&oldid=913130601",
+		"accessed": {
+			"date-parts": [
+				[
+					"2021",
+					3,
+					21
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2019",
+					8,
+					30
+				]
+			]
+		}
+	},
+	{
+		"id": "http://zotero.org/users/7645537/items/RNUJTTDS",
+		"type": "webpage",
+		"abstract": "Gestalt principles of visual perception are an important set of concepts for any designer to learn, and their implementation can not only greatly improve the aesthetics of a design but also its functionality and user-friendliness.",
+		"container-title": "Toptal Design Blog",
+		"language": "en",
+		"title": "Exploring the Gestalt Principles of Design",
+		"URL": "https://www.toptal.com/designers/ui/gestalt-principles-of-design",
+		"author": [
+			{
+				"family": "Chapman",
+				"given": "Cameron"
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2021",
+					3,
+					21
+				]
+			]
+		}
+	},
+	{
+		"id": "http://zotero.org/users/7645537/items/ZIUFQJ7Y",
+		"type": "entry-encyclopedia",
+		"abstract": "Gestalt psychology, gestaltism or configurationism   is a school of psychology that emerged in the early twentieth century in Austria and Germany as a theory of perception that was a rejection to the basic principles of Wilhelm Wundt's and Edward Titchener's elementalist and structuralist psychology.As used in Gestalt psychology, the German word Gestalt ( gə-SHTA(H)LT, -⁠STAHLT, -⁠S(H)TAWLT, German: [ɡəˈʃtalt] (listen); meaning \"form\") is interpreted as \"pattern\" or \"configuration\". Gestalt psychologists emphasized that organisms perceive entire patterns or configurations, not merely individual components. The view is sometimes summarized using the adage, \"the whole is more than the sum of its parts.\" Gestalt principles, proximity, similarity, figure-ground, continuity, closure, and connection, determine how humans perceive visuals in connection with different objects and environments.\nGestalt psychology was founded on works by Max Wertheimer, Wolfgang Köhler, and Kurt Koffka.",
+		"container-title": "Wikipedia",
+		"language": "en",
+		"note": "Page Version ID: 1013131596",
+		"source": "Wikipedia",
+		"title": "Gestalt psychology",
+		"URL": "https://en.wikipedia.org/w/index.php?title=Gestalt_psychology&oldid=1013131596",
+		"accessed": {
+			"date-parts": [
+				[
+					"2021",
+					3,
+					21
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2021",
+					3,
+					20
+				]
+			]
+		}
+	},
+	{
+		"id": "http://zotero.org/users/7645537/items/Y2NS2S2E",
+		"type": "book",
+		"abstract": "A guide to making visualizations that accurately reflect the data, tell a story, and look professional.",
+		"edition": "1",
+		"publisher": "O'Reilly Media",
+		"source": "clauswilke.com",
+		"title": "Fundamentals of Data Visualization",
+		"URL": "https://clauswilke.com/dataviz/index.html",
+		"author": [
+			{
+				"family": "Wilke",
+				"given": "Claus O."
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2021",
+					3,
+					21
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2019",
+					4,
+					30
+				]
+			]
+		}
+	},
+	{
+		"id": "http://zotero.org/users/7645537/items/6GJ2AUHC",
+		"type": "webpage",
+		"container-title": "Andy Rutledge",
+		"title": "Gestalt Principles - 4: Common Fate",
+		"URL": "https://www.andyrutledge.com/common-fate.html",
+		"author": [
+			{
+				"family": "Rutledge",
+				"given": "Andy"
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2021",
+					3,
+					21
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2009",
+					7,
+					13
+				]
+			]
+		}
+	},
+	{
+		"id": "http://zotero.org/users/7645537/items/286WNG6C",
+		"type": "entry-encyclopedia",
+		"abstract": "Jacques Bertin (27 July 1918 – 3 May 2010) was a French cartographer and theorist, known from his book Semiologie Graphique (Semiology of Graphics), published in 1967. This monumental work, based on his experience as a cartographer and geographer, represents the first and widest intent to provide a theoretical foundation to Information Visualization, with his most lasting contribution being his set of visual variables that can be used to construct  map symbols and other graphical techniques one of then being the \nBertin Projection, an innovative map projection type.",
+		"container-title": "Wikipedia",
+		"language": "en",
+		"note": "Page Version ID: 1001147772",
+		"source": "Wikipedia",
+		"title": "Jacques Bertin",
+		"URL": "https://en.wikipedia.org/w/index.php?title=Jacques_Bertin&oldid=1001147772",
+		"accessed": {
+			"date-parts": [
+				[
+					"2021",
+					3,
+					21
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2021",
+					1,
+					18
+				]
+			]
+		}
+	},
+	{
+		"id": "http://zotero.org/users/7645537/items/FBBRGNJV",
+		"type": "chapter",
+		"container-title": "International Encyclopedia of Geography: People, the Earth, Environment and Technology",
+		"event-place": "Oxford, UK",
+		"ISBN": "978-0-470-65963-2",
+		"language": "en",
+		"note": "DOI: 10.1002/9781118786352.wbieg0761",
+		"page": "1-11",
+		"publisher": "John Wiley & Sons, Ltd",
+		"publisher-place": "Oxford, UK",
+		"source": "DOI.org (Crossref)",
+		"title": "Visual Variables",
+		"URL": "http://doi.wiley.com/10.1002/9781118786352.wbieg0761",
+		"editor": [
+			{
+				"family": "Richardson",
+				"given": "Douglas"
+			},
+			{
+				"family": "Castree",
+				"given": "Noel"
+			},
+			{
+				"family": "Goodchild",
+				"given": "Michael F."
+			},
+			{
+				"family": "Kobayashi",
+				"given": "Audrey"
+			},
+			{
+				"family": "Liu",
+				"given": "Weidong"
+			},
+			{
+				"family": "Marston",
+				"given": "Richard A."
+			}
+		],
+		"author": [
+			{
+				"family": "Roth",
+				"given": "Robert E."
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2021",
+					3,
+					21
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2017",
+					3,
+					6
+				]
+			]
+		}
+	},
+	{
+		"id": "http://zotero.org/users/7645537/items/ZSPWKPQD",
+		"type": "chapter",
+		"abstract": "We propose an empirical, perception-based evaluation approach for assessing the effectiveness and efficiency of longstanding cartographic design principles applied to 2D map displays. The approach includes bottom-up visual saliency models that are compared with eye-movement data collected in human-subject experiments on map stimuli embedded in the so-called flicker paradigm. The proposed methods are applied to the assessment of four commonly used visual variables for designing 2D maps: size, color value, color hue, and orientation. The empirical results suggest that the visual variable size is the most efficient (fastest) and most effective (accurate) visual variable to detect change under flicker conditions. The visual variable orientation proved to be the least efficient and effective of the tested visual variables. These empirical results shed new light on the implied ranking of the visual variables that have been proposed over 40 years ago. With the presented approach we hope to provide cartographers, GIScientists and visualization designers a systematic assessment method to develop effective and efficient geovisualization displays.",
+		"container-title": "Spatial Information Theory",
+		"event-place": "Berlin, Heidelberg",
+		"ISBN": "978-3-642-03831-0",
+		"language": "en",
+		"note": "collection-title: Lecture Notes in Computer Science\nDOI: 10.1007/978-3-642-03832-7_12",
+		"page": "195-211",
+		"publisher": "Springer Berlin Heidelberg",
+		"publisher-place": "Berlin, Heidelberg",
+		"source": "DOI.org (Crossref)",
+		"title": "Evaluating the Effectiveness and Efficiency of Visual Variables for Geographic Information Visualization",
+		"URL": "http://link.springer.com/10.1007/978-3-642-03832-7_12",
+		"volume": "5756",
+		"editor": [
+			{
+				"family": "Hornsby",
+				"given": "Kathleen Stewart"
+			},
+			{
+				"family": "Claramunt",
+				"given": "Christophe"
+			},
+			{
+				"family": "Denis",
+				"given": "Michel"
+			},
+			{
+				"family": "Ligozat",
+				"given": "Gérard"
+			}
+		],
+		"author": [
+			{
+				"family": "Garlandini",
+				"given": "Simone"
+			},
+			{
+				"family": "Fabrikant",
+				"given": "Sara Irina"
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2021",
+					3,
+					21
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2009"
+				]
+			]
+		}
 	}
 ]
