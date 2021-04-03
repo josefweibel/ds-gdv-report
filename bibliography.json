@@ -392,5 +392,70 @@
 				]
 			]
 		}
+	},
+	{
+		"id": "http://zotero.org/users/7645537/items/XGT97YUG",
+		"type": "webpage",
+		"abstract": "When the data is spewing garbage",
+		"container-title": "Medium",
+		"language": "en",
+		"title": "The Ultimate Guide to Data Cleaning",
+		"URL": "https://towardsdatascience.com/the-ultimate-guide-to-data-cleaning-3969843991d4",
+		"author": [
+			{
+				"family": "Elgabry",
+				"given": "Omar"
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2021",
+					4,
+					2
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2019",
+					3,
+					2
+				]
+			]
+		}
+	},
+	{
+		"id": "http://zotero.org/users/7645537/items/FE295SK9",
+		"type": "webpage",
+		"abstract": "Best practice and tips for creating clean raw data optimised for data analysis and visualisations.",
+		"genre": "Page",
+		"language": "en",
+		"title": "Prepare data for analysis and visualisations",
+		"URL": "https://www.eea.europa.eu/data-and-maps/daviz/learn-more/prepare-data",
+		"author": [
+			{
+				"literal": "European Environment Agency"
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2021",
+					4,
+					3
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2015",
+					3,
+					26
+				]
+			]
+		}
 	}
 ]
