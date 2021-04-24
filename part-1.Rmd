@@ -147,7 +147,7 @@ plot_scatterplot <- function () {
     geom_point() +
     scale_colour_manual(values = c('darkblue', 'darkred')) +
     labs(
-      title = 'Voter Participation over Time',
+      title = 'Factors for votes\' final result',
       subtitle = sprintf('Pearson Correlation: %f', correlation),
       y = 'Number of Accepting Cantons',
       x = 'Overall Yes Votes Percentage',
