@@ -457,5 +457,76 @@
 				]
 			]
 		}
+	},
+	{
+		"id": "http://zotero.org/users/7645537/items/K24E4NL5",
+		"type": "webpage",
+		"abstract": "Learn effective strategies for leveraging a layered Grammar of Graphics framework for effective data visualization",
+		"container-title": "Medium",
+		"language": "en",
+		"title": "A Comprehensive Guide to the Grammar of Graphics for Effective Visualization of Multi-dimensional…",
+		"URL": "https://towardsdatascience.com/a-comprehensive-guide-to-the-grammar-of-graphics-for-effective-visualization-of-multi-dimensional-1f92b4ed4149",
+		"author": [
+			{
+				"family": "Sarkar",
+				"given": "Dipanjan"
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2021",
+					4,
+					24
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2018",
+					9,
+					13
+				]
+			]
+		}
+	},
+	{
+		"id": "http://zotero.org/users/7645537/items/FJXPCUT8",
+		"type": "article-journal",
+		"container-title": "Journal of Computational and Graphical Statistics",
+		"DOI": "10.1198/jcgs.2009.07098",
+		"ISSN": "1061-8600, 1537-2715",
+		"issue": "1",
+		"journalAbbreviation": "Journal of Computational and Graphical Statistics",
+		"language": "en",
+		"page": "3-28",
+		"source": "DOI.org (Crossref)",
+		"title": "A Layered Grammar of Graphics",
+		"URL": "http://www.tandfonline.com/doi/abs/10.1198/jcgs.2009.07098",
+		"volume": "19",
+		"author": [
+			{
+				"family": "Wickham",
+				"given": "Hadley"
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2021",
+					4,
+					24
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2010",
+					1
+				]
+			]
+		}
 	}
 ]

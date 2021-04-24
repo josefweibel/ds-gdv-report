@@ -1,0 +1,226 @@
+---
+title: 'gdv Report - Part 4'
+subtitle: 'Grammar of Graphics Tools'
+author: "Joseph Weibel"
+date: "18.04.2021"
+output: 
+  pdf_document:
+    keep_tex: true
+    md_extensions: +raw_attribute
+    
+bibliography: bibliography.json
+csl: apa.csl
+geometry: left=1.5cm,right=1.5cm,top=1.9cm,bottom=1.9cm
+header-includes:
+  - \usepackage{graphicx}
+  - \usepackage{wrapfig}
+  - \usepackage{caption}
+  - \captionsetup[figure]{font=tiny}
+  - \usepackage{fancyhdr}
+  - \pagestyle{fancy}
+  - \fancyfoot[L]{Joseph Weibel}
+  - \fancyfoot[R]{gdv Report}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+original_plot <- knitr::knit_hooks$get("plot") 
+knitr::knit_hooks$set(plot = function(x, options) {
+  graphic <- original_plot(x, options)
+  if(!is.null(options$wrapfigure)) {
+    graphic <- str_replace(graphic, fixed("\\begin{figure}"), "")
+    graphic <- str_replace(graphic, fixed("\\end{figure}"), "")
+    begin <- sprintf('\\begin{wrapfigure}{%s}{%g\\textwidth}', options$wrapfigure[[1]], options$wrapfigure[[2]])
+    return (c(begin, graphic, '\\end{wrapfigure}'))
+  }
+  return(graphic)
+})
+
+
+library(tidyverse)
+library(zoo)
+library(ggplot2)
+library(RSwissMaps)
+library(corrr)
+source('./data.R')
+
+raw_data <- load_data()
+long_data <- raw_data %>%
+  rename_with(~ gsub('^(.{2})\\.(.+)$', '\\1.kanton.\\2', .x), zh.berecht:ju.annahme) %>%
+  pivot_longer(zh.kanton.berecht:ju.kanton.annahme, names_to = c('kanton', '.value'), names_pattern = "(.{2})\\.(.+)", values_drop_na = TRUE)
+
+total_entries <- nrow(raw_data)
+```
+
+\vspace{10pt}
+
+\begin{center}
+Github Repository: https://github.com/josefweibel/ds-gdv-report
+\end{center}
+
+\newpage
+
+# Grammar of Graphics Tools
+
+The Grammar of Graphics is a strategy helping users to create data visualisation in a structured way. It was proposed by Leland Wilkinson and was built on Bertin's characteristics described in part two. This grammar depicts all components of a graphic and characterises them to obtain a precise understanding of them [@http://zotero.org/users/7645537/items/K24E4NL5]. It was then extended and refined by Hadley Wickham, which resulted in "A Layered Grammar of Graphics" [-@http://zotero.org/users/7645537/items/FJXPCUT8]. He manifested his work by implementing the visualisation framework `ggplot2` in R. This concept, including its layers, will be discussed on the following pages, along with some examples.
+
+According to Wickham, a graphic consists of the following components [@http://zotero.org/users/7645537/items/FJXPCUT8]: 
+
+* data and aesthetic mappings
+* geometric objects representing the data
+* scales
+* facets
+* statistical transformations
+* coordinate-system
+
+## Layers
+
+```{r multi_layers, message=FALSE, out.width=".3\\textwidth", wrapfigure=list("R", 0.3), fig.cap=multi_layers_caption}
+multi_layers_caption <- 'Line chart showing voter participation over time with an additional smoothed line.'
+plot_multi_layers <- function () {
+  ggplot(raw_data %>% filter(!is.na(bet)), mapping = aes(x = datum, y = bet)) +
+    geom_line() +
+    geom_smooth() +
+    ylim(0, 100) +
+    labs(
+      title = 'Voter Participation over Time',
+      y = 'Voter Participation Percentage',
+      x = 'Time'
+    )
+}
+
+plot_multi_layers()
+```
+
+The mentioned layers in the concept's title are formed by data, including mappings, geometric objects, and statistical transformation. A graphic can contain multiple layers to visualise differently or the same data in different ways. However, the different layers usually have something in common. For instance, a graphic could visualise the temperature and precipitation for a joint period whereby each variable would be part of a separate layer.
+
+Another example is plotted in figure 1. The graphic contains two layers whereby both are based on the same data and mappings. Both visualise the voter participation for each polling day since the beginning of the recordings. While the first layer uses a line as geometric objects, the other layer uses a line too but with a statistical transformation. The data is transformed to gain a smooth representation of it, helping to identify the general tendency for this volatile variable.
+
+A crucial part of every layer is the visualised **data**. Since the data's variables can have arbitrary names, **aesthetic mappings** are defined to map these to the different markers and channels. Often variables are assigned to the x- and y-axes, while others could be assigned to a channel like size or colour. The definition of aesthetic mappings makes it possible to exchange the initial data with data from another source or sometimes even different data while keeping the same graphic. The same graphic can look very different depending on the supplied data [@http://zotero.org/users/7645537/items/FJXPCUT8]. 
+
+```{r jittering, warning = FALSE, fig.asp=.5, out.width="50%", fig.show = "hold", fig.cap=jittering_caption}
+jittering_caption <- 'Scatter plots without and with jittered values.'
+plot_participation_scatter <- function (position) {
+  ggplot(raw_data %>% filter(!is.na(bet)), mapping = aes(x = volkja.proz, y = ja.lager)) +
+    xlim(-5, 105) +
+    ylim(-5, 105) +
+    labs(
+      title = 'Relation between Yes Votes and Voter Share of Yes Camp',
+      y = 'Voter Share Yes Camp',
+      x = 'Yes Votes Percentage'
+    )
+}
+
+plot_participation_scatter('identity') + geom_point()
+plot_participation_scatter('jitter') + geom_jitter(width = 10, height = 10)
+
+```
+
+A **statistical transformation** applies a specific calculation to the provided data and is often linked to the geometrical object. An example of such a transformation is the smoother [@http://zotero.org/users/7645537/items/FJXPCUT8] used in figure 1. When plotting a bar chart, the columns should often represent the number of occurrences of the value they represent. The counting of occurrences is a statistical transformation as the quantile computations are needed for a box plot. Moreover, the so-called process of jittering is also a statistical transformation. Scatter plots often suffer from overlapping points, giving the viewer the impression that there are fewer points than there exist in the data. Visualisation libraries like `ggplot2` provide the jitter functionality to spread the points over the coordinate system in respect to their original value. The disadvantage of this technique is that the plotted values no longer match with the original data but to get an impression of the distribution, jittering can be very useful. Figure 2 shows two plots with the same data whereby the graphic on the right uses jittering to spread the points from the four clusters.
+
+The **geometric objects** define the form in which data is rendered. Depending on the intended chart type, the corresponding geometric objects must be chosen. Points will result in a scatter plot, bars in a bar plot and lines in a line chart. However, some geoms (abbreviation for geometrical objects) render differently depending on the circumstances. An interval will look different on a bar chart than surrounding a line on a line chart. Every geometrical object is only able to visualise particular aesthetics [@http://zotero.org/users/7645537/items/FJXPCUT8]. Many will support x and y values, but not all can be rendered with different shapes. 
+
+```{r particiaption_bars, message=FALSE, warning=FALSE, fig.width=16, fig.asp = 0.5, out.width=".3\\textwidth", wrapfigure=list("R", 0.3), fig.cap=particiaption_bars_caption}
+particiaption_bars_caption <- 'Bar chart showing voter particaption for some cantons.'
+plot_particiaption_bar <- function () {
+  data <- long_data %>%
+    filter(!is.na(kanton.bet)) %>%
+    filter(kanton %in% c('zh', 'sh', 'bs', 'ge', 'vs')) %>%
+    mutate(decade = jahr - jahr %% 10) %>%
+    group_by(kanton, decade) %>%
+    summarise(
+      median_bet = median(kanton.bet, na.rm = TRUE),
+      .groups = 'drop'
+    ) 
+  
+  ggplot(data, mapping = aes(x = toupper(kanton), y = median_bet, group = decade, fill = decade)) +
+    geom_bar(position = 'dodge', stat = 'identity') +
+    geom_text(mapping = aes(label = decade, y = 2), color = "white", angle = 90, size = 3.5, hjust = 0, position = position_dodge(width = 0.89)) +
+    ylim(0, 100) +
+    labs(
+      title = 'Voter Participation over Time',
+      y = 'Median Voter Participation Percentage',
+      x = 'Canton',
+      fill = 'Decade'
+    )
+}
+
+plot_particiaption_bar()
+```
+Furthermore, sometimes **positional adjustment** is needed on a layer. Jittering falls apart from being a statistical transformation also in this category. Another example is bar charts where the columns of the same category can be stacked, placed on each other or side by side. Depending on the type of data, different positioning is desired. When showing parts of a whole, the bars are usually stacked, whereby the bars are often placed side by side when comparing values of different years. An example for the latter one is presented in figure 3, visualising voter participation as bar charts for specific cantons. For every canton, 15 columns are rendered, whereby every column represents the median participation in a specific decade. The variances between the different cantons are as clearly visible as the variances over time within a canton. 
+
+
+## Scales
+
+While transforming data into geometrical objects, scales are needed to map the values to a unit suitable for the aesthetic. A scale can map the values of a variable to different colours or simply to a value on one of the axes. On the other hand, scales are also used to render the axes and their labels. For other aesthetics than the axes, they are used to generate the legends [@http://zotero.org/users/7645537/items/FJXPCUT8].
+
+
+## Coordinate System
+
+A coordinate system describes where the individual components should be positioned on the plot. The most popular one is the Cartesian; however, using others like the Polar and the logarithmic can change the form of the geometrical objects. A bar chart will not be rendered with rectangles in a Polar system as it would be in the Cartesian. The bars will be visualised as segments of a circle since the system itself visualises a whole circle [@http://zotero.org/users/7645537/items/FJXPCUT8].
+
+
+## Facets
+
+```{r facets, message=FALSE, fig.asp=0.55, fig.width=12, out.width=".4\\textwidth", wrapfigure=list("R", 0.4), fig.cap=facets_caption}
+facets_caption <- 'Scatter plots showing voter participation per canton.'
+plot_facets <- function () {
+  data <- long_data %>%
+    filter(!is.na(kanton.bet))
+
+  ggplot(data, mapping = aes(x = datum, y = kanton.bet)) +
+    geom_line() +
+    geom_smooth() +
+    ylim(0, 100) +
+    labs(
+      title = 'Voter Participation per Canton',
+      y = 'Voter Participation',
+      x = 'Time'
+    ) +
+    facet_wrap(vars(toupper(kanton)), ncol = 6)
+}
+
+plot_facets()
+```
+
+When individual parts of data should be compared, either additional aesthetics or layers will often be added to the plot. For example, in a scatter plot, the individual dots are painted in different colours, indicating their category. When using line charts, a line for each category will be drawn to split the data. With many categories, the plot gets convoluted, and facets can remedy this. By facetting a graphic, a separate graphic for each category will be created. These graphics will then be placed next to each other to allow the comparison of the values. All plots will have the same geometrical objects, statistical transformations, and also scales. By keeping the same scales, the values can be compared easily without converting them between the plots. Figure 4 uses facets to show generally the same information as in figure 1, but this time individually per canton. The x-axis of every individual plot starts at 1879, the beginning of the recording. This strikes in the plot for the canton Jura founded only in 1979 and has no data visualised most of the time.
+
+In conclusion, grammar for graphics defines the components of a graphic and their connections and helps create visualisations in a structured way. The fact that the Layered Grammar of Graphics by Wickham was transferred into a popular plotting library by him, which shows that this theory also works in practice. 
+
+\newpage
+
+# Appendix
+
+## Figures
+
+### Figure 1: `r multi_layers_caption`
+
+```{r appendix-figure-multi-layers, message=FALSE}
+plot_multi_layers()
+```
+
+### Figure 2: `r jittering_caption`
+
+```{r appendix-figure-jittering, warning=FALSE, out.width="50%", fig.show = "hold"}
+plot_participation_scatter('identity') + geom_point()
+plot_participation_scatter('jitter') + geom_jitter(width = 10, height = 10)
+```
+
+### Figure 3: `r particiaption_bars_caption`
+
+```{r appendix-figure-particiaption-bars, message=FALSE, fig.asp = 0.5, fig.width=16}
+plot_particiaption_bar()
+```
+
+### Figure 4: `r facets_caption`
+
+```{r appendix-figure-facets, fig.asp=0.55, fig.width=16, message=FALSE}
+plot_facets()
+```
+
+
+\newpage
+
+# References
+
