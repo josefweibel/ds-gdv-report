@@ -1,0 +1,161 @@
+---
+title: 'gdv Report - Part 5'
+subtitle: 'Evaluation'
+author: "Joseph Weibel"
+date: "07.06.2021"
+output: 
+  pdf_document:
+    keep_tex: true
+    md_extensions: +raw_attribute
+    
+bibliography: bibliography.json
+csl: apa.csl
+geometry: left=1.5cm,right=1.5cm,top=1.9cm,bottom=1.9cm
+header-includes:
+  - \usepackage{graphicx}
+  - \usepackage{wrapfig}
+  - \usepackage{caption}
+  - \captionsetup[figure]{font=tiny}
+  - \usepackage{fancyhdr}
+  - \pagestyle{fancy}
+  - \fancyfoot[L]{Joseph Weibel}
+  - \fancyfoot[R]{gdv Report}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+original_plot <- knitr::knit_hooks$get("plot") 
+knitr::knit_hooks$set(plot = function(x, options) {
+  graphic <- original_plot(x, options)
+  if(!is.null(options$wrapfigure)) {
+    graphic <- str_replace(graphic, fixed("\\begin{figure}"), "")
+    graphic <- str_replace(graphic, fixed("\\end{figure}"), "")
+    begin <- sprintf('\\begin{wrapfigure}{%s}{%g\\textwidth}', options$wrapfigure[[1]], options$wrapfigure[[2]])
+    return (c(begin, graphic, '\\end{wrapfigure}'))
+  }
+  return(graphic)
+})
+
+
+library(tidyverse)
+library(zoo)
+library(ggplot2)
+library(RSwissMaps)
+library(corrr)
+source('./data.R')
+
+raw_data <- load_data()
+long_data <- raw_data %>%
+  rename_with(~ gsub('^(.{2})\\.(.+)$', '\\1.kanton.\\2', .x), zh.berecht:ju.annahme) %>%
+  pivot_longer(zh.kanton.berecht:ju.kanton.annahme, names_to = c('kanton', '.value'), names_pattern = "(.{2})\\.(.+)", values_drop_na = TRUE)
+
+total_entries <- nrow(raw_data)
+```
+
+\vspace{10pt}
+
+\begin{center}
+Github Repository: https://github.com/josefweibel/ds-gdv-report
+\end{center}
+
+\newpage
+
+# Evaluation
+
+After creating data visualisation and applying these various theoretical concepts, the new graphic might not be comprehensible for the target audience, or they cannot extract the intended information. Moreover, while building the visualisation, a data scientist can get too focused on theoretical and technical details, leading to these problems. Conducting an evaluation for the created visualisation can reveal such issues. 
+
+However, evaluations are not only to ensure quality; they are also performed to compare different possible solutions to identify the best. After an evaluation, some quantitative numbers can often be extracted, which decision-makers can use to improve their decisions. These figures can also be used for scientific work where objectivity is crucial. And, eventually, the fact that an evaluation was conducted can help convince relevant people about the graphic’s quality [@http://zotero.org/users/7645537/items/945RVA5J].
+
+## Methods
+
+Depending on how a data visualisation project is conducted, different possible evaluation methods can be used. There exist some quantitative analyses to measure the complexity and scalability of visualisations. They are essential if changes in the dataset are foreseeable, and the graphic must be regenerated with the updated dataset. A too complex plot can consume too much time for its generation, which is not viable when generated for the viewer in real-time. Counting specific image characteristics like the number of line crossings, contrasts between colours and distances between markers are other possibilities for quantitative analyses which can be conducted without users. 
+
+However, many evaluation methods, and probably the most effective, rely on users. These user studies can be conducted in different ways. In one possible scenario, a user is shown one of the multiple versions of data visualisation. The different visualisations can have only slight deviations like different scales, colours or swapped axes. The user should then solve a given task while its time to complete the task is measured, or the task results are noted and evaluated. This process should be repeated with the same task but with multiple users and randomly assigned data visualisations. After all, the best visualisation regarding speed or results can be determined by comparing the outcomes of the different users. This method can be adjusted that every user receives all the variants minimising the noise and the number of participants required. 
+
+If a data visualisation project emphasises usability, it should be conducted with deep user involvement. User involvement begins by asking the concerned users first about their goals and problems and only afterwards creating a possible solution based on their inputs. This approach is contrary to the one described before. Nevertheless, the proposed solution is also evaluated by the users after it has been prototyped. However, more attention is put on the user’s opinion and inputs rather than just the quantitative results in such scenarios. This process will be conducted iteratively until a satisfactory solution has been found for the users. 
+
+Every evaluation should start with a hypothesis which will be checked after the conduct using a statistical test to minimise the risk of taking the wrong decision because of a too-small user group. The uncertainty should also be disclosed when the result is presented. Also, the methodology and information about the participants should be outlined with every evaluation to be understandable and trustworthy for the result’s recipient [@http://zotero.org/users/7645537/items/945RVA5J].
+
+
+## Conducting an Evaluation
+
+After introducing the theory of evaluations, an actual evaluation will be executed using the Swissvotes dataset [@http://zotero.org/users/7645537/items/X2S7ZYLM] again. Two plots were created using the data since 2000 to show the differences between every canton and the whole of Switzerland. Both plots in figure 2 show the number of votes a canton voted different than the final Swiss result. Interpreting the results, a high number of diverging voting results means the canton’s voters often get outvoted and thus have a different opinion than the majority of the nation. It is especially interesting to find possible patterns in these results, for instance, if cantons with specific characteristics like primary languages or rural areas are more often outvoted than others. A good data visualisation supports the viewer to detect these patterns; thus, these plots will undergo a user study to identify the more intelligible one. 
+
+Actually, cantons of the French and Italian speaking parts of Switzerland, together with Central Switzerland, have voted differently more often than the Swiss majority. These perceptions become apparent when viewing the data as a map. However, the bar plot shows clearly that the canton with the most deviations is Geneva with more than 40 of 182 votes. The bottom line of this statement would be that it is easier to extract approximate numbers using the bar chart while patterns are more visible when presenting the data on a map. This message can be transformed into a hypothesis which can then be verified in a user study. 
+
+\newpage
+
+```{r evaluation_subjects, warning=FALSE, fig.asp=0.9, out.width="50%", fig.show = "hold", fig.cap=evaluation_subjects_caption}
+evaluation_subjects_caption <- 'Two charts both showing number of diverging voting results since 2000 for each canton'
+
+diff_annahme_per_canton <- long_data %>%
+  filter(jahr >= 2000) %>%
+  mutate(diff_annahme = kanton.annahme != annahme) %>%
+  group_by(kanton) %>%
+  summarise(
+    diff_annahme = sum(diff_annahme),
+    .groups = 'keep'
+  ) %>%
+  ungroup() %>%
+  mutate(kanton = toupper(kanton)) %>%
+  arrange(desc(diff_annahme)) %>%
+  inner_join(can.template(2016), by = c('kanton' = 'name'))
+
+number_of_votes_since_2000 <- raw_data %>%
+  filter(jahr >= 2000) %>%
+  nrow()
+
+plot_evaluation_subjects <- function() {
+  plot1 <- ggplot(diff_annahme_per_canton, mapping=aes(x = diff_annahme, y = reorder(kanton, diff_annahme))) +
+    geom_bar(stat='identity') + 
+    labs(
+      title = 'Cantons Voting Different than Swiss Majority',
+      subtitle = paste('Total Number of Votes Since 2000:', number_of_votes_since_2000),
+      x = 'Number of Diverging Voting Results Since 2000',
+      y = 'Canton'
+    )
+  
+  plot2 <- can.plot(
+    diff_annahme_per_canton$bfs_nr, 
+    diff_annahme_per_canton$diff_annahme, 
+    2016,
+    title = 'Cantons Voting Different than Swiss Majority',
+    subtitle = paste('Total Number of Votes Since 2000:', number_of_votes_since_2000),
+    legend_title = 'Number of Diverging Voting Results Since 2000',
+  )
+  
+  print(plot1)
+  print(plot2)
+}
+
+plot_evaluation_subjects()
+```
+
+Since the focus of the diagram relies on identifying patterns, the hypothesis is: “Users will use the map instead of the bar chart to identify the relevant patterns.” Since there will only be a few participants for this evaluation, they will get both visualisations presented. Their task will be to describe what they notice and also tell on which plots they notice it. Both plots will be shown to the participant simultaneously; however, the order of the plots will be chosen randomly. The participants consist of two women aged 18 and 48. Both are neither related to data science nor politics. 
+
+One participant first noted that the Canton of Geneva is the most divergent as she looked at the bar chart. Immediately afterwards, she added the Canton of Jura and Ticino, also having a high deviation which she discovered this time on the map. The other participant also mentioned the Canton of Geneva as the canton with the highest differences; however, the following observation was already the one sought for: “The latin part of Switzerland seems to be more often outvoted than Swiss Midlands.” According to her, she extracted this information from the map. She supplemented her statement later with Appenzell Innerrhoden and the cantons of Central Switzerland. The first survey attendee observed some other extreme values in certain cantons before she also detected the high deviations of the French-speaking cantons, the ones in Central Switzerland and Appenzell Innerrhoden. These patterns did she detect like the other participant by analysing the map. 
+
+Despite the small test group, the results point in a clear direction. People use the map to identify any pattern, although it has no explicit values printed on it. Like one participant remarked: “I am using the bar chart to extract the exact values and to get a feeling of the actual differences, but the map is useful for finding clusters like the one of the French-speaking cantons.” With this statement and the other results, the hypothesis is confirmed by the evaluation. Another finding of this user survey is that small cantons like Geneva tend to be overlooked as it happened to both participants, which mentioned the top three cantons by looking on the map except for Geneva, which has been determined based on the bar chart. The fact that Geneva is on the very edge of the map might not help gain enough attention from the viewers. To conclude this data visualisation evaluation, a map seems to be the right choice in this case when the particular target is to identify geographical patterns. However, for other goals, the bar plot or other chart types will perform better. 
+
+# Conclusion
+
+As the bottom line of the evaluation already concludes, there is no one fits all chart or strategy in data visualisation. For every chart to create its purpose and audience have to be determined before the decisions about chart types, channels, markers, etc. can be made. However, it is essential to keep the characteristics of the different chart components in mind while designing a new chart. Each one has its strengths and weaknesses and thus should be used in particular cases and avoided in others. While it might be challenging to choose the right components for a data scientists designing its first few charts, user studies are vital to confirm the taken decisions. Even more important than they are for experienced visualisation designers.
+
+\newpage
+
+# Appendix
+
+## Figures
+
+### Figure 1: `r evaluation_subjects_caption`
+
+```{r appendix-figure-evaliation-subjects, warning=FALSE, fig.asp=0.9, out.width="50%", fig.show = "hold"}
+plot_evaluation_subjects()
+```
+
+
+\newpage
+
+# References
+

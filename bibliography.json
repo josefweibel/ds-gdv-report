@@ -528,5 +528,35 @@
 				]
 			]
 		}
+	},
+	{
+		"id": "http://zotero.org/users/7645537/items/945RVA5J",
+		"type": "article",
+		"title": "Evaluation in Visualization",
+		"URL": "https://homepage.univie.ac.at/michael.sedlmair/teaching/shandong-eval-2017.pdf",
+		"author": [
+			{
+				"family": "Sedlmair",
+				"given": "Michael"
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2021",
+					5,
+					12
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2017",
+					11,
+					24
+				]
+			]
+		}
 	}
 ]
