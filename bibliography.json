@@ -558,5 +558,28 @@
 				]
 			]
 		}
+	},
+	{
+		"id": "http://zotero.org/users/7645537/items/LXRQVUKX",
+		"type": "article-journal",
+		"container-title": "Visual Business Intelligence Newsletter",
+		"language": "en",
+		"source": "Zotero",
+		"title": "Save the Pies for Dessert",
+		"URL": "https://www.perceptualedge.com/articles/visual_business_intelligence/save_the_pies_for_dessert.pdf",
+		"author": [
+			{
+				"family": "Few",
+				"given": "Stephen"
+			}
+		],
+		"issued": {
+			"date-parts": [
+				[
+					"2007",
+					8
+				]
+			]
+		}
 	}
 ]
