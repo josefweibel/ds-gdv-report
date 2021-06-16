@@ -51,36 +51,50 @@ total_entries <- nrow(raw_data)
 
 \begin{titlepage}
     \begin{center}
-        \vspace*{1.5cm}
+        \vspace*{0.4cm}
 
         \Huge
-        \textbf{Fundamentals of Data Visualization}
+        \textbf{Fundamentals of \\Data Visualization}
 
-        \vspace{0.5cm}
+        \vspace{0.3cm}
         \LARGE
         Report
 
-        \vspace{1.5cm}
+        \vspace{0.8cm}
 
         \textbf{Joseph Weibel}
 
         \vfill
+        
+        \includegraphics[width=0.75\textwidth]{title-image}
+
+        \vfill
+        
+        \vspace{0.3cm}
 
         \Large
         FHNW\\
         Data Science\\
         June 2021
         
-        \vspace{1.5cm}
+        \vspace{1.0cm}
         
         \normalsize
         Github Repository: https://github.com/josefweibel/ds-gdv-report
+        
+        \vspace{0.8cm}
 
     \end{center}
 \end{titlepage}
 
 \setcounter{tocdepth}{2}
 \tableofcontents
+
+\vfill
+
+\small
+Visualisation on the title page has a decorative purpose only.
+\normalsize
 
 \newpage
 
@@ -241,8 +255,8 @@ plot_barchart()
 
 Bar charts are straightforward for the viewer. Every value of a categorical variable has a bar or column that reflects the value of the corresponding numerical value. They are great to compare the numeric values, and if the numeric values are sums of different subordinated values, they can also be shown by dividing the bar into parts. These are called stacked bar charts. However, too many bars will make it difficult to determine an exact numeric value for the column, and the whole plot gets unwieldy. Restricting to only a certain amount of values will solve it [@http://zotero.org/users/7645537/items/PLQE7977]. The example shows the average voter participation since 2000 per canton. At first glance, the viewer can tell that participation is the highest in canton Schaffhausen, most likely because it is somehow compulsory to vote there.
 
-```{r map, warning=F, fig.asp=0.45, out.width=".25\\textwidth", wrapfigure=list("R", 0.25), fig.cap=map_vaption}
-map_vaption <- 'Map showing voter participation per canton.'
+```{r map, warning=F, fig.asp=0.45, out.width=".25\\textwidth", wrapfigure=list("R", 0.25), fig.cap=map_caption}
+map_caption <- 'Map showing voter participation per canton.'
 plot_map <- function () {
   participation_per_canton_map_data <- can.template(2016) %>%
     inner_join(participation_per_canton_data, by = c('name' = 'kanton'))
@@ -326,9 +340,9 @@ These theoretical principles are all relevant when designing data visualisations
 
 ### Location
 
-```{r location_scale, fig.asp=0.2, out.width="50%", fig.show = "hold", fig.cap=location_scale_caption}
+```{r location_scale, fig.asp=0.18, out.width="50%", fig.show = "hold", fig.cap=location_scale_caption}
 location_scale_caption <- 'Line charts showing voter participation over time with different y scales.'
-plot_linechart <- function (y_start = 0, y_end = 100) {
+plot_linechart <- function (y_start = 0, y_end = 100, thumbnail = 0) {
   rolling_period = 5
   data <- as_tibble(raw_data %>%
     filter(!is.na(bet)) %>%
@@ -336,20 +350,28 @@ plot_linechart <- function (y_start = 0, y_end = 100) {
     summarise(avg_bet = mean(bet), .groups = 'drop') %>%
     ungroup() %>%
     rollapply(rolling_period, mean, align = 'right'))
-  ggplot(data, mapping = aes(x = jahr, y = avg_bet)) +
+  plot <- ggplot(data, mapping = aes(x = jahr, y = avg_bet)) +
     geom_line() +
     xlim(1879, 2020) +
     ylim(y_start, y_end) +
     labs(
-      title = 'Voter Participation over Time',
-      caption = sprintf('Rolling period over last %d years', rolling_period),
-      y = 'Participation in Percent',
-      x = 'Voting Date'
+      title = 'Voter Participation over Time'
     )
+  
+  if (!thumbnail) {
+    plot <- plot + 
+      labs(
+        caption = sprintf('Rolling period over last %d years', rolling_period),
+        y = 'Participation in Percent',
+        x = 'Voting Date'
+      )
+  }
+  
+  return(plot)
 }
 
-plot_linechart(35, 75)
-plot_linechart()
+plot_linechart(35, 75, thumbnail = 1)
+plot_linechart(thumbnail = 1)
 ```
 
 ```{r location_periodic1, fig.asp=0.3, out.width=".1\\textwidth", wrapfigure=list("R", 0.2), fig.cap=location_periodic1_caption}
@@ -549,7 +571,7 @@ data_types_infographic_caption <- 'Infographic showcasing different data types a
 
 ![`r data_types_infographic_caption`](./data-types.png){width=80%}
 
-One of the first analysis a data scientists makes is checking the distribution of a variable. For that, various chart types are available, but not all of them are suitable. Since qualitative data is categorised, a simple bar plot can be used to get an impression of the distribution. Every value is plotted as a bar or column, and its length reflects the number of occurrences. Since a continuous quantitative variable could have hundreds of different values, a bar chart would be convoluted. Thus, a histogram is more practicable since it creates groups, the so-called bins, from the existing values. Another possibility is density plots; however, both have their advantages and disadvantages, as explained in the first part. 
+One of the first analyses a data scientists makes is checking the distribution of a variable. For that, various chart types are available, but not all of them are suitable. Since qualitative data is categorised, a simple bar plot can be used to get an impression of the distribution. Every value is plotted as a bar or column, and its length reflects the number of occurrences. Since a continuous quantitative variable could have hundreds of different values, a bar chart would be convoluted. Thus, a histogram is more practicable since it creates groups, the so-called bins, from the existing values. Another possibility is density plots; however, both have their advantages and disadvantages, as explained in the first part. 
 
 Charts in figure 18 demonstrate plotting the data distribution of a continuous quantitative variable. A bar chart has been used on the left side, and on the right side, a histogram with a bin width of `1` per cent. Since percentage values occurring more than once are very unlikely even in this dataset with more than 600 referendums, the bar chart shows hundreds of columns indicating only one or, at maximum, three occurrences. On the histogram, though, the accurate data distribution is apparent at first glance. 
 
@@ -853,7 +875,7 @@ plot_linechart()
 plot_barchart()
 ```
 
-### Figure 7: `r map_vaption`
+### Figure 7: `r map_caption`
 
 ```{r appendix-figure-map, warning=F}
 plot_map()
